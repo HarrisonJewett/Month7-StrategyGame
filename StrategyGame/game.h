@@ -5,11 +5,8 @@ public:
 	game();
 	~game();
 
-
-
 	//Functions
 	void Play();
 	void Update();
 	void Render();
 };
-
