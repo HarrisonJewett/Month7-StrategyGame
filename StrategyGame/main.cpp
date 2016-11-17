@@ -2,6 +2,8 @@
 
 int main(int argc, char** argv)
 {
+	srand((unsigned)time(0));
+
 	game GP;
 	GP.Play();
 

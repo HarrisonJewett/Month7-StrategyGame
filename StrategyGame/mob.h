@@ -33,4 +33,5 @@ public:
 	unsigned short getY() { return yCoor; }
 	void setX(unsigned short _x) { xCoor = _x; }
 	void setY(unsigned short _y) { yCoor = _y; }
+	bool isAlive() { return charBool & (1 << 1); }
 };

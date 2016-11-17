@@ -9,7 +9,6 @@ mob::mob(unsigned int _range, char _name, unsigned int _min, unsigned int _max, 
 	name = _name;
 	minAtt = _min;
 	maxAtt = _max;
-	srand((unsigned)time(0));
 	charBool = 0;
 	if (_isPlayer1)
 		charBool |= (1);	
