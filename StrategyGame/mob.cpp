@@ -11,7 +11,7 @@ mob::mob(unsigned int _range, char _name, unsigned int _min, unsigned int _max, 
 	maxAtt = _max;
 	charBool = 0;
 	if (_isPlayer1)
-		charBool |= (1);	
+		charBool |= (1);
 	charBool |= (1 << 1);
 	xCoor = _x;
 	yCoor = _y;

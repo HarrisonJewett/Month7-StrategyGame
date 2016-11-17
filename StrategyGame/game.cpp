@@ -3,6 +3,14 @@
 #include <iostream>
 #include <Windows.h>
 #include <random>
+#include <conio.h>
+
+#define UP_ARROW 72
+#define DOWN_ARROW 80
+#define LEFT_ARROW 75
+#define RIGHT_ARROW 77
+#define ESCAPE 27
+
 
 using namespace std;
 
@@ -28,7 +36,8 @@ game::game()
 	for (int i = 0; i < 6; ++i)
 		board[characters[i]->getX()][characters[i]->getY()] = characters[i]->getSymbol();
 
-	currentTurn = 1;
+	currentTurn = 0;
+
 }
 
 game::~game()
@@ -71,13 +80,13 @@ void game::Render()
 {
 	system("cls");
 
+	loop = 1;
+
 	//Drawing the board
 	for (unsigned int i = 0; i < 6; ++i)
 	{
 		for (unsigned int j = 0; j < 6; ++j)
-		{
-			cout << board[i][j];
-		}
+			cout << board[j][i];
 		cout << '\n';
 	}
 
@@ -89,28 +98,82 @@ void game::Render()
 
 	for (unsigned int i = 0; i < 6; ++i)
 	{
-		position = { (short)30, (short)(currentTurn + i) };
+		position = { (short)30, (short)(1 + i) };
 		SetConsoleCursorPosition(output, position);
 		cout << turnOrder[i]->getSymbol();
 	}
 
 
 	//Displaying health
-	cout << "\n\n\nVigor\n";
+	cout << "\n\n\nHealth\n";
 	for (unsigned int i = 0; i < 3; ++i)
 		cout << "P1: " << characters[i]->getSymbol() << ": " << characters[i]->getHealth() << "/20     ";
 	cout << '\n';
 	for (unsigned int i = 3; i < 6; ++i)
 		cout << "P2: " << characters[i]->getSymbol() << ": " << characters[i]->getHealth() << "/20     ";
+	//int x = (gameCharBool & (1 << 1));
 
+	checkMovementSpaces(turnOrder[currentTurn]->getX(), turnOrder[currentTurn]->getY());
 
-	while (true)
+	//x = (gameCharBool & (1 << 1));
+
+	if ((gameCharBool & (1 << 1)) == 0)
 	{
-
+		cout << "\nNo valid moves. Press enter to move to attack phase.";
+		while (true)
+		{
+			if (GetAsyncKeyState(VK_RETURN))
+				break;
+		}
 	}
 
-	if (currentTurn == 6)
-		currentTurn = 1;
+	else
+	{
+		cout << "\nUse arrow keys to move. Press ESC to skip your movement.";
+
+		while (loop)
+		{
+			if (_kbhit())
+			{
+				char isArrowKey = _getch();
+
+				if (isArrowKey == ESCAPE)
+					loop = 0;
+				else if (224)
+				{
+					char input = _getch();
+
+					board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = '*';
+
+					switch (input)
+					{
+					case UP_ARROW:
+						if (gameCharBool & (1 << 1))
+							turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() - 1);
+						break;
+					case RIGHT_ARROW:
+						if (gameCharBool & (1 << 2))
+							turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() + 1);
+						break;
+					case DOWN_ARROW:
+						if (gameCharBool & (1 << 3))
+							turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() + 1);
+						break;
+					case LEFT_ARROW:
+						if (gameCharBool & (1 << 4))
+							turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() - 1);
+						break;
+					}
+					loop = 0;
+					board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = turnOrder[currentTurn]->getSymbol();
+
+				}
+			}
+		}
+	}
+
+	if (currentTurn == 5)
+		currentTurn = 0;
 	else
 		++currentTurn;
 }

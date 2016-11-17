@@ -26,6 +26,8 @@ class game
 	//5 is west
 	char gameCharBool;
 
+	char loop;
+
 	unsigned short currentTurn;
 public:
 	game();
@@ -36,4 +38,5 @@ public:
 	void Update();
 	void Render();
 	void checkMovementSpaces(unsigned short _x, unsigned short _y);
+	void drawBoard();
 };
