@@ -89,7 +89,7 @@ void game::Render()
 
 	for (unsigned int i = 0; i < 6; ++i)
 	{
-		position = { (short)30, (short)(currentTurn + i)};
+		position = { (short)30, (short)(currentTurn + i) };
 		SetConsoleCursorPosition(output, position);
 		cout << turnOrder[i]->getSymbol();
 	}
@@ -123,7 +123,7 @@ void game::checkMovementSpaces(unsigned short _x, unsigned short _y)
 			gameCharBool |= (1 << 4);
 		if (board[5][4] == '*')
 			gameCharBool |= (1 << 1);
-			
+
 	}
 	else if (_x == 5 && _y == 0)
 	{
@@ -150,22 +150,47 @@ void game::checkMovementSpaces(unsigned short _x, unsigned short _y)
 	}
 	else if (_x == 0 && _y == 0)
 	{
-
+		if (board[1][0] == '*')
+			gameCharBool |= (1 << 2);
+		if (board[0][1] == '*')
+			gameCharBool |= (1 << 3);
 	}
 	else if (_x == 0)
 	{
-
+		if (board[0][_y - 1] == '*')
+			gameCharBool |= (1 << 1);
+		if (board[1][_y] == '*')
+			gameCharBool |= (1 << 2);
+		if (board[0][_y + 1] == '*')
+			gameCharBool |= (1 << 3);
 	}
 	else if (_x > 0 && _x < 5 && _y == 0)
 	{
-
+		if (board[_x - 1][0] == '*')
+			gameCharBool |= (1 << 4);
+		if (board[_x][1] == '*')
+			gameCharBool |= (1 << 3);
+		if (board[_x + 1][0] == '*')
+			gameCharBool |= (1 << 2);
 	}
 	else if (_x > 0 && _x < 5 && _y == 5)
 	{
-
+		if (board[_x - 1][5] == '*')
+			gameCharBool |= (1 << 4);
+		if (board[_x][4] == '*')
+			gameCharBool |= (1 << 1);
+		if (board[_x + 1][5] == '*')
+			gameCharBool |= (1 << 2);
 	}
 	else
 	{
-
+		if (board[_x][_y - 1] == '*')
+			gameCharBool |= (1 << 1);
+		if (board[_x + 1][_y] == '*')
+			gameCharBool |= (1 << 2);
+		if (board[_x][_y + 1] == '*')
+			gameCharBool |= (1 << 3);
+		if (board[_x - 1][_y] == '*')
+			gameCharBool |= (1 << 4);
 	}
 }
