@@ -17,7 +17,7 @@ class game
 	mob* turnOrder[6];
 	mob* temp = nullptr;
 
-	char** board;
+	char*** board;
 
 	//bit 1 is continue playing
 	//2 is north

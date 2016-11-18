@@ -26,15 +26,15 @@ game::game()
 
 	gameCharBool = 1;
 
-	board = new char*[6];
+	board = new char**[6];
 	for (int i = 0; i < 6; ++i)
 	{
-		board[i] = new char[6];
+		board[i] = new char*[6];
 		for (int j = 0; j < 6; ++j)
-			board[i][j] = '*';
+			*board[i][j] = '*';
 	}
 	for (int i = 0; i < 6; ++i)
-		board[characters[i]->getX()][characters[i]->getY()] = characters[i]->getSymbol();
+		*board[characters[i]->getX()][characters[i]->getY()] = characters[i]->getSymbol();
 
 	currentTurn = 0;
 
@@ -78,9 +78,85 @@ void game::Update()
 
 void game::Render()
 {
+	while (currentTurn != 6)
+	{
+		loop = 1;
+
+		drawBoard();
+
+		checkMovementSpaces(turnOrder[currentTurn]->getX(), turnOrder[currentTurn]->getY());
+
+		//Movement Phase
+		if ((gameCharBool & (1 << 1)) == 0 && (gameCharBool & (1 << 2)) == 0 && (gameCharBool & (1 << 3)) == 0 && (gameCharBool & (1 << 4)) == 0)
+		{
+			cout << "\nNo valid moves. Press enter to move to attack phase.";
+			while (true)
+			{
+				if (GetAsyncKeyState(VK_RETURN))
+					break;
+			}
+		}
+
+		else
+		{
+			cout << "\nUse arrow keys to move. Press ESC to skip your movement.";
+
+			while (loop)
+			{
+				if (_kbhit())
+				{
+					char isArrowKey = _getch();
+
+					if (isArrowKey == ESCAPE)
+						loop = 0;
+					else if (224)
+					{
+						char input = _getch();
+
+						*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = '*';
+
+						switch (input)
+						{
+						case UP_ARROW:
+							if (gameCharBool & (1 << 1))
+								turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() - 1);
+							break;
+						case RIGHT_ARROW:
+							if (gameCharBool & (1 << 2))
+								turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() + 1);
+							break;
+						case DOWN_ARROW:
+							if (gameCharBool & (1 << 3))
+								turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() + 1);
+							break;
+						case LEFT_ARROW:
+							if (gameCharBool & (1 << 4))
+								turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() - 1);
+							break;
+						}
+						loop = 0;
+						*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = turnOrder[currentTurn]->getSymbol();
+
+					}
+				}
+			}
+			drawBoard();
+		}
+
+		//Attack Phase
+
+
+
+
+		++currentTurn;
+	}
+	currentTurn = 0;
+}
+
+void game::drawBoard()
+{
 	system("cls");
 
-	loop = 1;
 
 	//Drawing the board
 	for (unsigned int i = 0; i < 6; ++i)
@@ -103,7 +179,6 @@ void game::Render()
 		cout << turnOrder[i]->getSymbol();
 	}
 
-
 	//Displaying health
 	cout << "\n\n\nHealth\n";
 	for (unsigned int i = 0; i < 3; ++i)
@@ -111,149 +186,84 @@ void game::Render()
 	cout << '\n';
 	for (unsigned int i = 3; i < 6; ++i)
 		cout << "P2: " << characters[i]->getSymbol() << ": " << characters[i]->getHealth() << "/20     ";
-	//int x = (gameCharBool & (1 << 1));
-
-	checkMovementSpaces(turnOrder[currentTurn]->getX(), turnOrder[currentTurn]->getY());
-
-	//x = (gameCharBool & (1 << 1));
-
-	if ((gameCharBool & (1 << 1)) == 0)
-	{
-		cout << "\nNo valid moves. Press enter to move to attack phase.";
-		while (true)
-		{
-			if (GetAsyncKeyState(VK_RETURN))
-				break;
-		}
-	}
-
-	else
-	{
-		cout << "\nUse arrow keys to move. Press ESC to skip your movement.";
-
-		while (loop)
-		{
-			if (_kbhit())
-			{
-				char isArrowKey = _getch();
-
-				if (isArrowKey == ESCAPE)
-					loop = 0;
-				else if (224)
-				{
-					char input = _getch();
-
-					board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = '*';
-
-					switch (input)
-					{
-					case UP_ARROW:
-						if (gameCharBool & (1 << 1))
-							turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() - 1);
-						break;
-					case RIGHT_ARROW:
-						if (gameCharBool & (1 << 2))
-							turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() + 1);
-						break;
-					case DOWN_ARROW:
-						if (gameCharBool & (1 << 3))
-							turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() + 1);
-						break;
-					case LEFT_ARROW:
-						if (gameCharBool & (1 << 4))
-							turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() - 1);
-						break;
-					}
-					loop = 0;
-					board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = turnOrder[currentTurn]->getSymbol();
-
-				}
-			}
-		}
-	}
-
-	if (currentTurn == 5)
-		currentTurn = 0;
-	else
-		++currentTurn;
 }
 
 void game::checkMovementSpaces(unsigned short _x, unsigned short _y)
 {
 	if (_x == 5 && _y == 5)
 	{
-		if (board[4][5] == '*')
+		if (*board[4][5] == '*')
 			gameCharBool |= (1 << 4);
-		if (board[5][4] == '*')
+		if (*board[5][4] == '*')
 			gameCharBool |= (1 << 1);
 
 	}
 	else if (_x == 5 && _y == 0)
 	{
-		if (board[4][0] == '*')
+		if (*board[4][0] == '*')
 			gameCharBool |= (1 << 4);
-		if (board[5][1] == '*')
+		if (*board[5][1] == '*')
 			gameCharBool |= (1 << 2);
 	}
-	else if (_x == 5)
+	else if (_x == 5 && _y < 5 && _y > 0)
 	{
-		if (board[5][_y - 1] == '*')
+		if (*board[5][_y - 1] == '*')
 			gameCharBool |= (1 << 1);
-		if (board[4][_y] == '*')
+		if (*board[4][_y] == '*')
 			gameCharBool |= (1 << 4);
-		if (board[5][_y + 1] == '*')
+		if (*board[5][_y + 1] == '*')
 			gameCharBool |= (1 << 3);
 	}
 	else if (_x == 0 && _y == 5)
 	{
-		if (board[0][4] == '*')
+		if (*board[0][4] == '*')
 			gameCharBool |= (1 << 1);
-		if (board[1][5] == '*')
+		if (*board[1][5] == '*')
 			gameCharBool |= (1 << 2);
 	}
 	else if (_x == 0 && _y == 0)
 	{
-		if (board[1][0] == '*')
+		if (*board[1][0] == '*')
 			gameCharBool |= (1 << 2);
-		if (board[0][1] == '*')
+		if (*board[0][1] == '*')
 			gameCharBool |= (1 << 3);
 	}
-	else if (_x == 0)
+	else if (_x == 0 && _y < 5 && _y > 0)
 	{
-		if (board[0][_y - 1] == '*')
+		if (*board[0][_y - 1] == '*')
 			gameCharBool |= (1 << 1);
-		if (board[1][_y] == '*')
+		if (*board[1][_y] == '*')
 			gameCharBool |= (1 << 2);
-		if (board[0][_y + 1] == '*')
+		if (*board[0][_y + 1] == '*')
 			gameCharBool |= (1 << 3);
 	}
 	else if (_x > 0 && _x < 5 && _y == 0)
 	{
-		if (board[_x - 1][0] == '*')
+		if (*board[_x - 1][0] == '*')
 			gameCharBool |= (1 << 4);
-		if (board[_x][1] == '*')
+		if (*board[_x][1] == '*')
 			gameCharBool |= (1 << 3);
-		if (board[_x + 1][0] == '*')
+		if (*board[_x + 1][0] == '*')
 			gameCharBool |= (1 << 2);
 	}
 	else if (_x > 0 && _x < 5 && _y == 5)
 	{
-		if (board[_x - 1][5] == '*')
+		if (*board[_x - 1][5] == '*')
 			gameCharBool |= (1 << 4);
-		if (board[_x][4] == '*')
+		if (*board[_x][4] == '*')
 			gameCharBool |= (1 << 1);
-		if (board[_x + 1][5] == '*')
+		if (*board[_x + 1][5] == '*')
 			gameCharBool |= (1 << 2);
 	}
-	else
+	else if (_x > 0 && _x < 5 && _y < 5 && _y > 0)
 	{
-		if (board[_x][_y - 1] == '*')
+		if (*board[_x][_y - 1] == '*')
 			gameCharBool |= (1 << 1);
-		if (board[_x + 1][_y] == '*')
+		if (*board[_x + 1][_y] == '*')
 			gameCharBool |= (1 << 2);
-		if (board[_x][_y + 1] == '*')
+		if (*board[_x][_y + 1] == '*')
 			gameCharBool |= (1 << 3);
-		if (board[_x - 1][_y] == '*')
+		if (*board[_x - 1][_y] == '*')
 			gameCharBool |= (1 << 4);
 	}
 }
