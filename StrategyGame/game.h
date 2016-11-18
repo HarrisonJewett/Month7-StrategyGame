@@ -17,6 +17,7 @@ class game
 	mob* turnOrder[6];
 	mob* temp = nullptr;
 
+
 	char*** board;
 
 	//bit 1 is continue playing
@@ -42,4 +43,6 @@ public:
 	void Render();
 	void checkMovementSpaces(unsigned short _x, unsigned short _y);
 	void drawBoard();
+	void gameOver(bool _isPlayer1);
+	bool getPlayAgain();
 };

@@ -5,7 +5,7 @@
 mob::mob(unsigned int _range, char _name, unsigned int _min, unsigned int _max, bool _isPlayer1, unsigned short _x, unsigned short _y)
 {
 	range = _range;
-	health = 20;
+	health = 2;
 	name = _name;
 	minAtt = _min;
 	maxAtt = _max;
@@ -25,7 +25,13 @@ unsigned int mob::getRNGAtt() { return ((rand() % (maxAtt - minAtt)) + minAtt); 
 char mob::getSymbol() { return name; }
 bool mob::getP1() { return (charBool & 1); }
 
-void mob::killMob(mob _mobToKill) { _mobToKill.charBool &= ~(1 << 1); }
+void mob::killMob() { charBool &= ~(1 << 1); }
 //Take Damage might cause a crash if damage delt is higher than remaining health
 
-void mob::takeDamage(unsigned int _damageDelt) { health -= _damageDelt; };
+void mob::takeDamage(unsigned int _damageDelt) 
+{
+	if (health < _damageDelt)
+		health = 0;
+	else
+		health -= _damageDelt;
+};

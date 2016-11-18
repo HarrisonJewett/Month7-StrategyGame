@@ -27,11 +27,12 @@ public:
 	unsigned int getRNGAtt();
 	char getSymbol();
 	bool getP1();
-	void killMob(mob _mobToKill);
+	void killMob();
 	void takeDamage(unsigned int _damageDelt);
 	unsigned short getX() { return xCoor; }
 	unsigned short getY() { return yCoor; }
 	void setX(unsigned short _x) { xCoor = _x; }
 	void setY(unsigned short _y) { yCoor = _y; }
-	bool isAlive() { return charBool & (1 << 1); }
+	bool isAlive() { return (charBool & (1 << 1)) != 0; }
+	void setSymbol(char _newSymbol) { name = _newSymbol; }
 };

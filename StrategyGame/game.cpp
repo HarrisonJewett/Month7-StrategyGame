@@ -44,6 +44,7 @@ game::game()
 
 	currentTurn = 0;
 
+
 }
 
 game::~game()
@@ -54,13 +55,23 @@ game::~game()
 	delete war2;
 	delete sor2;
 	delete arc2;
+
+	for (int i = 0; i < 6; ++i)
+	{
+		for (int j = 0; j < 6; ++j)
+		{
+			delete board[i][j];
+		}
+		delete[] board[i];
+	}
+	delete[]board;
 }
 
 void game::Play()
 {
 	while (gameCharBool & (1))
 	{
-		
+
 
 		for (unsigned int i = 0; i < 5; ++i)
 		{
@@ -84,43 +95,38 @@ void game::Render()
 {
 	while (currentTurn != 6)
 	{
-		loop = 1;
+		loop |= 1;
 
 		drawBoard();
 
 		//Set directions back to 0
-		for (int i = 1; i < 5; ++i)
+		for (int i = 1; i < 8; ++i)
 			gameCharBool &= ~(1 << i);
-
-		checkMovementSpaces(turnOrder[currentTurn]->getX(), turnOrder[currentTurn]->getY());
-
-		//Movement Phase
-		if ((gameCharBool & (1 << 1)) == 0 && (gameCharBool & (1 << 2)) == 0 && (gameCharBool & (1 << 3)) == 0 && (gameCharBool & (1 << 4)) == 0)
+		if (turnOrder[currentTurn]->isAlive())
 		{
-			cout << "\nNo valid moves. Press enter to move to attack phase.";
-			while (true)
-			{
-				if (GetAsyncKeyState(VK_RETURN))
-					break;
-			}
-		}
+			checkMovementSpaces(turnOrder[currentTurn]->getX(), turnOrder[currentTurn]->getY());
 
-		else
-		{
-			cout << "\nUse arrow keys to move. Press ESC to skip your movement.";
-
-			while (loop)
+			//Movement Phase
+			if ((gameCharBool & (1 << 1)) == 0 && (gameCharBool & (1 << 2)) == 0 && (gameCharBool & (1 << 3)) == 0 && (gameCharBool & (1 << 4)) == 0)
 			{
-				if (_kbhit())
+				cout << "\nNo valid moves. Press enter to move to attack phase.";
+				while (true)
 				{
-					char isArrowKey = _getch();
+					if (GetAsyncKeyState(VK_RETURN))
+						break;
+				}
+			}
 
-					if (isArrowKey == ESCAPE)
-						loop = 0;
-					else if (224)
+			else
+			{
+				cout << "\nUse arrow keys to move. Press ESC to skip your movement.";
+
+				while (loop)
+				{
+					if (_kbhit())
 					{
 						char input = _getch();
-						if (input == UP_ARROW || input == DOWN_ARROW || input == LEFT_ARROW || input == RIGHT_ARROW)
+						if (input == UP_ARROW || input == DOWN_ARROW || input == LEFT_ARROW || input == RIGHT_ARROW || input == ESCAPE)
 						{
 							*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = '*';
 
@@ -142,85 +148,120 @@ void game::Render()
 								if (gameCharBool & (1 << 4))
 									turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() - 1);
 								break;
+							case ESCAPE:
+								break;
 							}
 							loop = 0;
 							*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = turnOrder[currentTurn]->getSymbol();
 						}
 					}
 				}
+				drawBoard();
 			}
-			drawBoard();
-		}
 
-		//Attack Phase
-		//distance = abs (x2 – x1) + abs (y2 – y1)
+			//Attack Phase
+			//distance = abs (x2 – x1) + abs (y2 – y1)
 
-		cout << '\n';
+			cout << '\n';
 
-		if (turnOrder[currentTurn]->getP1())
-		{
-			for (unsigned int i = 3; i < 6; ++i)
+			if (turnOrder[currentTurn]->getP1())
 			{
-				if (abs(characters[i]->getX() - turnOrder[currentTurn]->getX()) + abs(characters[i]->getY() - turnOrder[currentTurn]->getY()) <= turnOrder[currentTurn]->getRange())
-					gameCharBool |= (1 << 2 + i);
-			}
-		}
-		else
-		{
-			for (unsigned int i = 0; i < 3; ++i)
-			{
-				if (abs(characters[i]->getX() - turnOrder[currentTurn]->getX()) + abs(characters[i]->getY() - turnOrder[currentTurn]->getY()) <= turnOrder[currentTurn]->getRange())
-					gameCharBool |= (1 << 2 + i);
-			}
-		}
-		if ((gameCharBool & (1 << 5)) == 0 && (gameCharBool & (1 << 6)) == 0 && (gameCharBool & (1 << 7)) == 0)
-			cout << "No possible targets. Press ENTER to end your turn.";
-		else
-		{
-			cout << "Possible Targets:";
-			if (gameCharBool & (1 << 5))
-				cout << "\n(W)arrior";
-			if (gameCharBool & (1 << 6))
-				cout << "\n(S)orcerer";
-			if (gameCharBool & (1 << 7))
-				cout << "\n(A)rcher";
-			cout << "\nPress ESC to skip your attack";
-			while (true)
-			{
-				if (_kbhit)
+				for (unsigned int i = 3; i < 6; ++i)
 				{
-					char _input = getch();
-					if (_input == WARRIOR)
+					if (characters[i]->isAlive())
 					{
-						if (gameCharBool & (1 << 5))
+						if ((unsigned int)((abs(characters[i]->getX() - turnOrder[currentTurn]->getX())) + abs(characters[i]->getY() - turnOrder[currentTurn]->getY()) <= turnOrder[currentTurn]->getRange()))
+							gameCharBool |= (1 << (2 + i));
+					}
+				}
+			}
+			else
+			{
+				for (unsigned int i = 0; i < 3; ++i)
+				{
+					if (characters[i]->isAlive())
+					{
+						if ((unsigned int)((abs(characters[i]->getX() - turnOrder[currentTurn]->getX())) + abs(characters[i]->getY() - turnOrder[currentTurn]->getY()) <= turnOrder[currentTurn]->getRange()))
+							gameCharBool |= (1 << (5 + i));
+					}
+				}
+			}
+			if ((gameCharBool & (1 << 5)) != 0 || (gameCharBool & (1 << 6)) != 0 || (gameCharBool & (1 << 7)) != 0)
+			{
+				cout << "Possible Targets:";
+				if (gameCharBool & (1 << 5))
+					cout << "\n(W)arrior";
+				if (gameCharBool & (1 << 6))
+					cout << "\n(S)orcerer";
+				if (gameCharBool & (1 << 7))
+					cout << "\n(A)rcher";
+				cout << "\nPress ESC to skip your attack";
+				while (true)
+				{
+					if (_kbhit())
+					{
+						char _input = _getch();
+						if (_input == WARRIOR)
 						{
+							if (gameCharBool & (1 << 5))
+							{
+								if (turnOrder[currentTurn]->getP1())
+									characters[3]->takeDamage(turnOrder[currentTurn]->getRNGAtt());
+								else
+									characters[0]->takeDamage(turnOrder[currentTurn]->getRNGAtt());
+								break;
+							}
+							else
+								break;
 						}
-						else
+						if (_input == SORCERER)
+						{
+							if (gameCharBool & (1 << 6))
+							{
+								if (turnOrder[currentTurn]->getP1())
+									characters[4]->takeDamage(turnOrder[currentTurn]->getRNGAtt());
+								else
+									characters[1]->takeDamage(turnOrder[currentTurn]->getRNGAtt());
+								break;
+							}
+							else
+								break;
+						}
+						if (_input == ARCHER)
+						{
+							if (gameCharBool & (1 << 7))
+							{
+								if (turnOrder[currentTurn]->getP1())
+									characters[5]->takeDamage(turnOrder[currentTurn]->getRNGAtt());
+								else
+									characters[2]->takeDamage(turnOrder[currentTurn]->getRNGAtt());
+								break;
+							}
+							else
+								break;
+						}
+						if (_input == ESCAPE)
 							break;
 					}
-					if (_input == SORCERER)
-					{
-						if (gameCharBool & (1 << 6))
-						{
+				}
 
-						}
-						else
-							break;
-					}
-					if (_input == ARCHER)
+				for (int i = 0; i < 6; ++i)
+				{
+					if (characters[i]->getHealth() < 1)
 					{
-						if (gameCharBool & (1 << 7))
-						{
-
-						}
-						else
-							break;
+						characters[i]->setSymbol('D');
+						characters[i]->killMob();
+						*board[characters[i]->getX()][characters[i]->getY()] = 'D';
 					}
 				}
 			}
 		}
-
 		++currentTurn;
+		if (!characters[0]->isAlive() && !characters[1]->isAlive() && !characters[2]->isAlive())
+			gameOver(false);
+		else if (!characters[3]->isAlive() && !characters[4]->isAlive() && !characters[5]->isAlive())
+			gameOver(true);
+
 	}
 	currentTurn = 0;
 }
@@ -263,7 +304,7 @@ void game::drawBoard()
 	for (unsigned int i = 3; i < 6; ++i)
 		cout << "P2: " << characters[i]->getSymbol() << ": " << characters[i]->getHealth() << "/20     ";
 
-	
+
 }
 
 void game::checkMovementSpaces(unsigned short _x, unsigned short _y)
@@ -344,4 +385,18 @@ void game::checkMovementSpaces(unsigned short _x, unsigned short _y)
 		if (*board[_x - 1][_y] == '*')
 			gameCharBool |= (1 << 4);
 	}
+}
+
+void game::gameOver(bool _isPlayer1)
+{
+	system("cls");
+	if (_isPlayer1)
+		cout << "\n\n\n                    PLAYER 1 WINS!!!";
+	else
+		cout << "\n\n\n                    PLAYER 2 WINS!!!";
+
+
+	gameCharBool = 0;
+
+
 }
