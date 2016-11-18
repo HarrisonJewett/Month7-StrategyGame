@@ -10,6 +10,9 @@
 #define LEFT_ARROW 75
 #define RIGHT_ARROW 77
 #define ESCAPE 27
+#define WARRIOR 119
+#define SORCERER 115
+#define ARCHER 97
 
 
 using namespace std;
@@ -31,7 +34,10 @@ game::game()
 	{
 		board[i] = new char*[6];
 		for (int j = 0; j < 6; ++j)
+		{
+			board[i][j] = new char();
 			*board[i][j] = '*';
+		}
 	}
 	for (int i = 0; i < 6; ++i)
 		*board[characters[i]->getX()][characters[i]->getY()] = characters[i]->getSymbol();
@@ -54,9 +60,7 @@ void game::Play()
 {
 	while (gameCharBool & (1))
 	{
-		//Set directions back to 0
-		for (int i = 1; i < 5; ++i)
-			gameCharBool &= ~(1 << i);
+		
 
 		for (unsigned int i = 0; i < 5; ++i)
 		{
@@ -83,6 +87,10 @@ void game::Render()
 		loop = 1;
 
 		drawBoard();
+
+		//Set directions back to 0
+		for (int i = 1; i < 5; ++i)
+			gameCharBool &= ~(1 << i);
 
 		checkMovementSpaces(turnOrder[currentTurn]->getX(), turnOrder[currentTurn]->getY());
 
@@ -112,31 +120,32 @@ void game::Render()
 					else if (224)
 					{
 						char input = _getch();
-
-						*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = '*';
-
-						switch (input)
+						if (input == UP_ARROW || input == DOWN_ARROW || input == LEFT_ARROW || input == RIGHT_ARROW)
 						{
-						case UP_ARROW:
-							if (gameCharBool & (1 << 1))
-								turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() - 1);
-							break;
-						case RIGHT_ARROW:
-							if (gameCharBool & (1 << 2))
-								turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() + 1);
-							break;
-						case DOWN_ARROW:
-							if (gameCharBool & (1 << 3))
-								turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() + 1);
-							break;
-						case LEFT_ARROW:
-							if (gameCharBool & (1 << 4))
-								turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() - 1);
-							break;
-						}
-						loop = 0;
-						*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = turnOrder[currentTurn]->getSymbol();
+							*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = '*';
 
+							switch (input)
+							{
+							case UP_ARROW:
+								if (gameCharBool & (1 << 1))
+									turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() - 1);
+								break;
+							case RIGHT_ARROW:
+								if (gameCharBool & (1 << 2))
+									turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() + 1);
+								break;
+							case DOWN_ARROW:
+								if (gameCharBool & (1 << 3))
+									turnOrder[currentTurn]->setY(turnOrder[currentTurn]->getY() + 1);
+								break;
+							case LEFT_ARROW:
+								if (gameCharBool & (1 << 4))
+									turnOrder[currentTurn]->setX(turnOrder[currentTurn]->getX() - 1);
+								break;
+							}
+							loop = 0;
+							*board[turnOrder[currentTurn]->getX()][turnOrder[currentTurn]->getY()] = turnOrder[currentTurn]->getSymbol();
+						}
 					}
 				}
 			}
@@ -144,9 +153,72 @@ void game::Render()
 		}
 
 		//Attack Phase
+		//distance = abs (x2 – x1) + abs (y2 – y1)
 
+		cout << '\n';
 
+		if (turnOrder[currentTurn]->getP1())
+		{
+			for (unsigned int i = 3; i < 6; ++i)
+			{
+				if (abs(characters[i]->getX() - turnOrder[currentTurn]->getX()) + abs(characters[i]->getY() - turnOrder[currentTurn]->getY()) <= turnOrder[currentTurn]->getRange())
+					gameCharBool |= (1 << 2 + i);
+			}
+		}
+		else
+		{
+			for (unsigned int i = 0; i < 3; ++i)
+			{
+				if (abs(characters[i]->getX() - turnOrder[currentTurn]->getX()) + abs(characters[i]->getY() - turnOrder[currentTurn]->getY()) <= turnOrder[currentTurn]->getRange())
+					gameCharBool |= (1 << 2 + i);
+			}
+		}
+		if ((gameCharBool & (1 << 5)) == 0 && (gameCharBool & (1 << 6)) == 0 && (gameCharBool & (1 << 7)) == 0)
+			cout << "No possible targets. Press ENTER to end your turn.";
+		else
+		{
+			cout << "Possible Targets:";
+			if (gameCharBool & (1 << 5))
+				cout << "\n(W)arrior";
+			if (gameCharBool & (1 << 6))
+				cout << "\n(S)orcerer";
+			if (gameCharBool & (1 << 7))
+				cout << "\n(A)rcher";
+			cout << "\nPress ESC to skip your attack";
+			while (true)
+			{
+				if (_kbhit)
+				{
+					char _input = getch();
+					if (_input == WARRIOR)
+					{
+						if (gameCharBool & (1 << 5))
+						{
+						}
+						else
+							break;
+					}
+					if (_input == SORCERER)
+					{
+						if (gameCharBool & (1 << 6))
+						{
 
+						}
+						else
+							break;
+					}
+					if (_input == ARCHER)
+					{
+						if (gameCharBool & (1 << 7))
+						{
+
+						}
+						else
+							break;
+					}
+				}
+			}
+		}
 
 		++currentTurn;
 	}
@@ -162,7 +234,7 @@ void game::drawBoard()
 	for (unsigned int i = 0; i < 6; ++i)
 	{
 		for (unsigned int j = 0; j < 6; ++j)
-			cout << board[j][i];
+			cout << *board[j][i];
 		cout << '\n';
 	}
 
@@ -171,6 +243,10 @@ void game::drawBoard()
 	COORD position = { 30, 0 };
 	SetConsoleCursorPosition(output, position);
 	cout << "Turn Order";
+
+	position = { 33, currentTurn + 1 };
+	SetConsoleCursorPosition(output, position);
+	cout << "<-";
 
 	for (unsigned int i = 0; i < 6; ++i)
 	{
@@ -186,6 +262,8 @@ void game::drawBoard()
 	cout << '\n';
 	for (unsigned int i = 3; i < 6; ++i)
 		cout << "P2: " << characters[i]->getSymbol() << ": " << characters[i]->getHealth() << "/20     ";
+
+	
 }
 
 void game::checkMovementSpaces(unsigned short _x, unsigned short _y)

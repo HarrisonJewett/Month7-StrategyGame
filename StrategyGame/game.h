@@ -24,6 +24,9 @@ class game
 	//3 is east
 	//4 is south
 	//5 is west
+	//6 can att war
+	//7 can att sor
+	//8	can att arc
 	char gameCharBool;
 
 	char loop;
