@@ -5,7 +5,7 @@
 mob::mob(unsigned int _range, char _name, unsigned int _min, unsigned int _max, bool _isPlayer1, unsigned short _x, unsigned short _y)
 {
 	range = _range;
-	health = 2;
+	health = 20;
 	name = _name;
 	minAtt = _min;
 	maxAtt = _max;

@@ -2,11 +2,11 @@
 #include <iostream>
 #include <conio.h>
 #include <Windows.h>
-
 using namespace std;
 
 int main(int argc, char** argv)
 {
+
 	srand((unsigned)time(0));
 
 	bool playAgain = true;
