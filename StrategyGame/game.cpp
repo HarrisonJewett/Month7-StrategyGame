@@ -91,6 +91,7 @@ void game::Update()
 
 }
 
+
 void game::Render()
 {
 	while (currentTurn != 6)
@@ -400,3 +401,5 @@ void game::gameOver(bool _isPlayer1)
 
 
 }
+
+//Push to public Repo
